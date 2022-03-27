@@ -58,4 +58,39 @@
             cursor: pointer;
         }
     }
+
+    .containerList {
+        gap: 10px;
+
+        padding: 0 12px;
+
+        strong {
+            font-size: 15px;
+        }
+
+        hr {
+            margin: 10px 0;
+        }
+
+        .itemTodo {
+            width: 100%;
+            height: 35px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            span {
+                font: 500 1.1rem 'Outfit', sans-serif;
+                color: #111;
+            }
+
+            button {
+                border: none;
+                background: transparent;
+
+                cursor: pointer;
+            }
+        }
+    }
 }
