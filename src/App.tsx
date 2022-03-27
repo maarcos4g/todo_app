@@ -51,6 +51,8 @@ export function App() {
         setMyTodos(response);
       }
     }
+
+    getTodosSaves();
   }, [])
 
   return (
@@ -75,12 +77,18 @@ export function App() {
 
         <hr />
 
-        <div className="itemTodo">
-          <span>Estudar React Native</span>
-          <button>
-            <img src={trashIcon} alt="Apagar tarefa" />
-          </button>
-        </div>
+        {
+          myTodos.map(item => {
+            return (
+              <div className="itemTodo" key={item?.id}>
+                <span>{item?.content}</span>
+                <button>
+                  <img src={trashIcon} alt="Apagar tarefa" />
+                </button>
+              </div>
+            );
+          })
+        }
 
       </div>
     </div>
