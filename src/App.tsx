@@ -3,7 +3,8 @@ import { v4 as uuidv4 } from 'uuid'
 
 import {
   saveTodosInLocalStorage,
-  getTodosInLocalStorage
+  getTodosInLocalStorage,
+  deleteTodoInLocalStorage
 } from './services/storage';
 
 import trashIcon from './assets/trash.svg'
@@ -53,7 +54,13 @@ export function App() {
     }
 
     getTodosSaves();
-  }, [])
+  }, [myTodos])
+
+  async function handleDeleteTodo(id: string) {
+    const response: TodoDataType[] = await deleteTodoInLocalStorage(myTodos, id);
+
+    setMyTodos(response);
+  }
 
   return (
     <div className="container">
@@ -82,7 +89,9 @@ export function App() {
             return (
               <div className="itemTodo" key={item?.id}>
                 <span>{item?.content}</span>
-                <button>
+                <button onClick={() => {
+                  handleDeleteTodo(item?.id);
+                }}>
                   <img src={trashIcon} alt="Apagar tarefa" />
                 </button>
               </div>

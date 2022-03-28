@@ -20,13 +20,17 @@ export async function saveTodosInLocalStorage(key: string, value: TodoDataType) 
         alert('Você já cadastrou uma tarefa com um conteudo igual.');
     }
 
+    if (value.content === null) {
+        alert("Erro ao adicionar.");
+    }
+
     todosStored.push(value);
     localStorage.setItem(key, JSON.stringify(todosStored));
 }
 
 export function deleteTodoInLocalStorage(item: TodoDataType[], id: string) {
-    let myTodos = item.filter(item => {
-        return (item.id !== id)
+    let myTodos = item?.filter(item => {
+        return (item?.id !== id)
     });
 
     localStorage.setItem('@todoData', JSON.stringify(myTodos));
