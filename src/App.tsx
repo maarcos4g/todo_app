@@ -1,105 +1,94 @@
-import { FormEvent, useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid'
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR'
+import { useEffect, useState } from 'react';
 
-import {
-  saveTodosInLocalStorage,
-  getTodosInLocalStorage,
-  deleteTodoInLocalStorage
-} from './services/storage';
+import { Button } from './components/Button';
+import { TodoItem } from './components/TodoItem';
 
-import trashIcon from './assets/trash.svg'
+import * as Dialog from '@radix-ui/react-dialog';
 
-import './App.scss'
+import { api, TodoReponse } from './lib/api';
 
-type TodoDataType = {
-  id: string;
-  content: string;
-}
+import styles from './styles/App.module.scss'
+import { Modal } from './components/Modal';
 
 export function App() {
-  const [todoText, setTodoText] = useState('');
-  const [data, setData] = useState<TodoDataType>();
+  const actualDate = format(new Date(), "d 'de' MMMM',' yyyy", {
+    locale: ptBR,
+  })
 
-  const [myTodos, setMyTodos] = useState<TodoDataType[]>([]);
+  const [todoData, setTodoData] = useState<TodoReponse[]>()
+  const [todoDataCompleted, setTodoDataCompleted] = useState<TodoReponse[]>()
 
-  function handleNewTodo(event: FormEvent) {
-    event.preventDefault();
-
-    if (todoText.trim() === "") {
-      return;
-    }
-
+  async function fetchTodoData() {
     try {
-      setData({
-        id: uuidv4(),
-        content: todoText,
-      });
-
-      saveTodosInLocalStorage('@todoData', data as TodoDataType);
-
-      setTodoText('');
+      const response = await api.get("/todos/incomplete");
+      setTodoData(response.data.todos);
     } catch (error) {
-      alert("Oops... algo deu errado!");
+      alert(error)
     }
+  }
 
+  async function fetchTodosCompleted() {
+    try {
+      const response = await api.get("/todos/completed");
+      setTodoDataCompleted(response.data.todos);
+    } catch (error) {
+      alert(error)
+    }
   }
 
   useEffect(() => {
-    async function getTodosSaves() {
-      const response: TodoDataType[] = await getTodosInLocalStorage('@todoData');
-
-      if (response.length > 0) {
-        setMyTodos(response);
-      }
-    }
-
-    getTodosSaves();
-  }, [myTodos])
-
-  async function handleDeleteTodo(id: string) {
-    const response: TodoDataType[] = await deleteTodoInLocalStorage(myTodos, id);
-
-    setMyTodos(response);
-  }
+    fetchTodoData();
+    fetchTodosCompleted()
+  }, [])
 
   return (
-    <div className="container">
-      <strong>Qual tarefa quer registrar?</strong>
-      <form
-        className="form-primary"
-        onSubmit={handleNewTodo}
-      >
-        <input
-          type="text"
-          placeholder="Descreva sua tarefa"
-          value={todoText}
-          onChange={(e) => setTodoText(e.target.value)}
-        />
+    <div>
+      <header className={styles.header}>
+        <h1>Home | Todo List</h1>
+        <span>{actualDate}</span>
+      </header>
 
-        <button type="submit">+</button>
-      </form>
+      <main className={styles.container}>
+        <div className={styles.todos}>
+          <span>Minhas tarefas</span>
 
-      <div className='containerList'>
-        <strong>Minhas tarefas de hoje</strong>
+          {todoData ? todoData.map(item => {
+            return <TodoItem
+              key={item.id}
+              title={item.title}
+              category={item.category}
+              isFinished={item.isFinished}
+              id={item.id}
+            />
+          }) : <p style={{ padding: 10 }}>Sem tarefas cadastradas</p>}
+        </div>
 
-        <hr />
+        <div className={styles.todosCompleted}>
+          <span>Minhas tarefas completas</span>
 
-        {
-          myTodos.map(item => {
-            return (
-              <div className="itemTodo" key={item?.id}>
-                <span>{item?.content}</span>
-                <button onClick={() => {
-                  handleDeleteTodo(item?.id);
-                }}>
-                  <img src={trashIcon} alt="Apagar tarefa" />
-                </button>
-              </div>
-            );
-          })
-        }
+          {todoDataCompleted?.length ? todoDataCompleted.map(item => {
+            return <TodoItem
+              key={item.id}
+              title={item.title}
+              category={item.category}
+              isFinished={item.isFinished}
+              id={item.id}
+            />
+          }) : <p style={{ padding: 10 }}>Sem tarefas completas</p>}
+        </div>
+      </main>
 
-      </div>
+      <footer className={styles.footer}>
+        <Dialog.Root>
+          <Dialog.Trigger asChild>
+            <Button position label='Adicionar nova tarefa' />
+          </Dialog.Trigger>
+
+          <Modal />
+        </Dialog.Root>
+      </footer>
     </div>
-  )
+  );
 }
