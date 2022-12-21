@@ -83,7 +83,7 @@ export function Modal() {
           </div>
 
           <div>
-            <label htmlFor="date">Data e hora</label>
+            <label htmlFor="date">Data e hora de conclusão</label>
             <input
               type="datetime-local"
               name="date"
